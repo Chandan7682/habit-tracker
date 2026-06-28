@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
-import { doc, getDoc, updateDoc, collection, addDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, addDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import Calendar from 'react-calendar';
@@ -23,7 +23,7 @@ export default function Dashboard({ user }) {
   const today = new Date().toDateString();
   const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-  useEffect(() => { loadAll(); }, []);
+  useEffect(() => { loadAll(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadAll = async () => {
     const docSnap = await getDoc(doc(db, 'users', user.uid));
@@ -62,7 +62,6 @@ export default function Dashboard({ user }) {
 
     const newStreak = completed === total ? (userData.streak||0)+1 : userData.streak||0;
 
-    // Save history
     const dateKey = new Date().toISOString().split('T')[0];
     const newHistory = {
       ...history,
@@ -159,7 +158,6 @@ export default function Dashboard({ user }) {
         .cal-partial { background: rgba(234,179,8,0.3) !important; border: 1px solid #eab308 !important; }
       `}</style>
 
-      {/* Announcement */}
       {announcement && (
         <div style={{background:`${themeColor}33`,border:`1px solid ${themeColor}`,borderRadius:'12px',padding:'12px 16px',marginBottom:'16px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
           <span style={{color:'#fff',fontSize:'13px'}}>📢 {announcement}</span>
@@ -167,7 +165,6 @@ export default function Dashboard({ user }) {
         </div>
       )}
 
-      {/* Header */}
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'16px'}}>
         <div>
           <h2 style={{margin:0,color:themeColor}}>⚡ {appName}</h2>
@@ -180,14 +177,12 @@ export default function Dashboard({ user }) {
         </div>
       </div>
 
-      {/* Daily Quote */}
       {settings.quote && (
         <div style={{background:'rgba(255,255,255,0.03)',borderRadius:'12px',padding:'12px 16px',marginBottom:'16px',border:'1px solid rgba(255,255,255,0.08)',fontStyle:'italic',color:'#aaa',fontSize:'13px',textAlign:'center'}}>
           💡 "{settings.quote}"
         </div>
       )}
 
-      {/* Level + XP */}
       <div style={{background:'rgba(255,255,255,0.05)',borderRadius:'14px',padding:'16px',marginBottom:'14px',border:'1px solid rgba(255,255,255,0.1)'}}>
         <div style={{display:'flex',justifyContent:'space-between',marginBottom:'8px'}}>
           <span style={{color:themeColor,fontWeight:'bold'}}>🏆 Level {level}</span>
@@ -202,7 +197,6 @@ export default function Dashboard({ user }) {
         </div>
       </div>
 
-      {/* Stats */}
       <div style={{display:'flex',gap:'10px',marginBottom:'14px'}}>
         {[{label:'Today XP',value:`+${userData?.todayXP||0}`},{label:'Done',value:`${completed}/${total}`},{label:'Progress',value:`${percent}%`}].map((s,i) => (
           <div key={i} style={{flex:1,background:'rgba(255,255,255,0.05)',borderRadius:'12px',padding:'12px',textAlign:'center',border:'1px solid rgba(255,255,255,0.1)'}}>
@@ -212,7 +206,6 @@ export default function Dashboard({ user }) {
         ))}
       </div>
 
-      {/* Progress Bar */}
       <div style={{background:'rgba(255,255,255,0.05)',borderRadius:'14px',padding:'14px',marginBottom:'14px',border:'1px solid rgba(255,255,255,0.1)'}}>
         <div style={{display:'flex',justifyContent:'space-between',marginBottom:'8px',fontSize:'13px'}}>
           <span>Aaj ka Progress</span>
@@ -223,7 +216,6 @@ export default function Dashboard({ user }) {
         </div>
       </div>
 
-      {/* Habits */}
       <h3 style={{color:'#aaa',marginBottom:'10px',fontSize:'14px'}}>📋 Aaj ki Habits</h3>
       {userData?.habits?.map((habit,i) => (
         <div key={i} onClick={() => toggleHabit(habit)} style={{display:'flex',alignItems:'center',gap:'12px',background:todayHabits[habit.name]?`${themeColor}44`:'rgba(255,255,255,0.05)',borderRadius:'12px',padding:'14px',marginBottom:'8px',cursor:'pointer',border:todayHabits[habit.name]?`1px solid ${themeColor}`:'1px solid rgba(255,255,255,0.1)',transition:'all 0.3s'}}>
@@ -234,7 +226,6 @@ export default function Dashboard({ user }) {
         </div>
       ))}
 
-      {/* Weekly Chart */}
       <h3 style={{color:'#aaa',margin:'16px 0 10px',fontSize:'14px'}}>📊 Weekly Progress</h3>
       <div style={{background:'rgba(255,255,255,0.05)',borderRadius:'14px',padding:'16px',marginBottom:'14px',border:'1px solid rgba(255,255,255,0.1)'}}>
         <ResponsiveContainer width="100%" height={140}>
@@ -247,7 +238,6 @@ export default function Dashboard({ user }) {
         </ResponsiveContainer>
       </div>
 
-      {/* Badges */}
       {badges.length > 0 && (
         <>
           <h3 style={{color:'#aaa',marginBottom:'8px',fontSize:'14px'}}>🏅 Badges</h3>
@@ -267,7 +257,6 @@ export default function Dashboard({ user }) {
         </div>
       )}
 
-      {/* Calendar Modal */}
       {showCalendar && (
         <div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,0.85)',display:'flex',justifyContent:'center',alignItems:'center',zIndex:1000,padding:'20px'}}>
           <div style={{background:'#1a1a2e',borderRadius:'20px',padding:'24px',width:'380px',maxHeight:'90vh',overflowY:'auto',border:'1px solid #7c3aed'}}>
@@ -275,30 +264,22 @@ export default function Dashboard({ user }) {
               <h3 style={{color:'#fff',margin:0}}>📅 Progress Calendar</h3>
               <button onClick={() => {setShowCalendar(false);setSelectedDay(null);setSelectedDayData(null);}} style={{background:'rgba(255,255,255,0.1)',border:'none',color:'#fff',padding:'6px 12px',borderRadius:'8px',cursor:'pointer'}}>✕</button>
             </div>
-
             <div style={{marginBottom:'12px',display:'flex',gap:'12px',fontSize:'12px'}}>
               <span>🟢 Complete</span>
               <span>🟡 Partial</span>
               <span>⬜ None</span>
             </div>
-
-            <Calendar
-              onClickDay={onCalendarClick}
-              tileClassName={getTileClassName}
-            />
-
+            <Calendar onClickDay={onCalendarClick} tileClassName={getTileClassName}/>
             {selectedDay && (
               <div style={{marginTop:'16px',background:'rgba(255,255,255,0.05)',borderRadius:'12px',padding:'14px',border:'1px solid rgba(255,255,255,0.1)'}}>
                 <h4 style={{color:'#a78bfa',margin:'0 0 10px'}}>{selectedDay}</h4>
                 {selectedDayData ? (
                   <>
-                    <p style={{color:'#aaa',fontSize:'13px',margin:'0 0 8px'}}>
-                      {selectedDayData.completed}/{selectedDayData.total} habits — {selectedDayData.percent}%
-                    </p>
-                    {Object.entries(selectedDayData.habits).map(([name, done], i) => (
+                    <p style={{color:'#aaa',fontSize:'13px',margin:'0 0 8px'}}>{selectedDayData.completed}/{selectedDayData.total} habits — {selectedDayData.percent}%</p>
+                    {Object.entries(selectedDayData.habits).map(([name,done],i) => (
                       <div key={i} style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'6px'}}>
-                        <span>{done ? '✅' : '○'}</span>
-                        <span style={{color:done?'#fff':'#555',fontSize:'13px',textDecoration:done?'none':'line-through'}}>{name}</span>
+                        <span>{done?'✅':'○'}</span>
+                        <span style={{color:done?'#fff':'#555',fontSize:'13px'}}>{name}</span>
                       </div>
                     ))}
                   </>
@@ -311,7 +292,6 @@ export default function Dashboard({ user }) {
         </div>
       )}
 
-      {/* Request Modal */}
       {showRequest && (
         <div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,0.8)',display:'flex',justifyContent:'center',alignItems:'center',zIndex:1000,padding:'20px'}}>
           <div style={{background:'#1a1a2e',borderRadius:'20px',padding:'24px',width:'360px',border:'1px solid #7c3aed'}}>

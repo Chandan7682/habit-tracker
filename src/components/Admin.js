@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, getDocs, updateDoc } from 'firebase/firestore';
 
 const ADMIN_EMAIL = 'chandankumar768208@gmail.com';
 
@@ -17,16 +17,12 @@ export default function Admin({ user, setShowAdmin }) {
   const [themeColor, setThemeColor] = useState('#7c3aed');
   const [saved, setSaved] = useState('');
 
-  useEffect(() => {
-    loadAll();
-  }, []);
+  useEffect(() => { loadAll(); }, []);
 
   const loadAll = async () => {
-    // Load habits
     const habitSnap = await getDoc(doc(db, 'admin', 'habits'));
     if (habitSnap.exists()) setHabits(habitSnap.data().list || []);
 
-    // Load settings
     const settingsSnap = await getDoc(doc(db, 'admin', 'settings'));
     if (settingsSnap.exists()) {
       const s = settingsSnap.data();
@@ -37,13 +33,11 @@ export default function Admin({ user, setShowAdmin }) {
       setThemeColor(s.themeColor || '#7c3aed');
     }
 
-    // Load users
     const usersSnap = await getDocs(collection(db, 'users'));
     const usersList = [];
     usersSnap.forEach(d => usersList.push({ id: d.id, ...d.data() }));
     setUsers(usersList);
 
-    // Load requests
     const reqSnap = await getDocs(collection(db, 'requests'));
     const reqList = [];
     reqSnap.forEach(d => reqList.push({ id: d.id, ...d.data() }));
@@ -111,13 +105,11 @@ export default function Admin({ user, setShowAdmin }) {
     <div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,0.9)',display:'flex',justifyContent:'center',alignItems:'center',zIndex:1000,padding:'20px'}}>
       <div style={{background:'#1a1a2e',borderRadius:'20px',width:'480px',maxHeight:'90vh',overflow:'hidden',border:'1px solid #7c3aed',display:'flex',flexDirection:'column'}}>
 
-        {/* Header */}
         <div style={{padding:'20px',borderBottom:'1px solid rgba(255,255,255,0.1)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
           <h2 style={{color:'#fff',margin:0}}>🛠️ Admin Panel</h2>
           <button onClick={() => setShowAdmin(false)} style={{background:'rgba(255,255,255,0.1)',border:'none',color:'#fff',padding:'8px 14px',borderRadius:'10px',cursor:'pointer'}}>✕</button>
         </div>
 
-        {/* Tabs */}
         <div style={{display:'flex',gap:'4px',padding:'12px',borderBottom:'1px solid rgba(255,255,255,0.1)',overflowX:'auto'}}>
           {tabs.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)} style={{padding:'8px 12px',background:tab===t.id?'#7c3aed':'rgba(255,255,255,0.07)',border:'none',borderRadius:'8px',color:'#fff',cursor:'pointer',fontSize:'12px',whiteSpace:'nowrap'}}>
@@ -126,16 +118,13 @@ export default function Admin({ user, setShowAdmin }) {
           ))}
         </div>
 
-        {/* Content */}
         <div style={{padding:'20px',overflowY:'auto',flex:1}}>
-
           {saved && (
             <div style={{background:'#059669',borderRadius:'10px',padding:'10px',textAlign:'center',color:'#fff',marginBottom:'12px',fontSize:'14px'}}>
               ✅ {saved}
             </div>
           )}
 
-          {/* HABITS TAB */}
           {tab === 'habits' && (
             <>
               <h3 style={{color:'#aaa',fontSize:'13px',marginBottom:'10px'}}>Current Habits ({habits.length})</h3>
@@ -147,9 +136,7 @@ export default function Admin({ user, setShowAdmin }) {
                   <button onClick={() => removeHabit(h.id)} style={{background:'#ff4444',border:'none',borderRadius:'6px',color:'#fff',padding:'4px 8px',cursor:'pointer'}}>×</button>
                 </div>
               ))}
-
               <div style={{marginTop:'16px',padding:'14px',background:'rgba(255,255,255,0.03)',borderRadius:'12px',border:'1px dashed rgba(255,255,255,0.1)'}}>
-                <p style={{color:'#aaa',fontSize:'12px',marginBottom:'8px'}}>Add New Habit</p>
                 <input placeholder="Habit name" value={newHabit.name} onChange={e => setNewHabit({...newHabit, name: e.target.value})} style={{width:'100%',padding:'10px',background:'rgba(255,255,255,0.1)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:'8px',color:'#fff',fontSize:'14px',marginBottom:'8px',boxSizing:'border-box'}}/>
                 <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
                   <input placeholder="Icon" value={newHabit.icon} onChange={e => setNewHabit({...newHabit, icon: e.target.value})} style={{width:'70px',padding:'10px',background:'rgba(255,255,255,0.1)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:'8px',color:'#fff',fontSize:'14px'}}/>
@@ -157,56 +144,48 @@ export default function Admin({ user, setShowAdmin }) {
                   <button onClick={addHabit} style={{flex:1,padding:'10px',background:'#7c3aed',border:'none',borderRadius:'8px',color:'#fff',cursor:'pointer',fontWeight:'bold'}}>+ Add</button>
                 </div>
               </div>
-
               <button onClick={saveHabits} style={{width:'100%',padding:'12px',background:'linear-gradient(90deg,#7c3aed,#4f46e5)',border:'none',borderRadius:'10px',color:'#fff',fontSize:'15px',cursor:'pointer',fontWeight:'bold',marginTop:'12px'}}>
                 💾 Save Habits
               </button>
             </>
           )}
 
-          {/* SETTINGS TAB */}
           {tab === 'settings' && (
             <>
               <div style={{marginBottom:'14px'}}>
                 <p style={{color:'#aaa',fontSize:'12px',marginBottom:'6px'}}>App Name</p>
                 <input value={appName} onChange={e => setAppName(e.target.value)} style={{width:'100%',padding:'10px',background:'rgba(255,255,255,0.1)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:'8px',color:'#fff',fontSize:'14px',boxSizing:'border-box'}}/>
               </div>
-
               <div style={{marginBottom:'14px'}}>
-                <p style={{color:'#aaa',fontSize:'12px',marginBottom:'6px'}}>Daily Quote (users ko dikhega)</p>
+                <p style={{color:'#aaa',fontSize:'12px',marginBottom:'6px'}}>Daily Quote</p>
                 <textarea value={quote} onChange={e => setQuote(e.target.value)} rows={3} style={{width:'100%',padding:'10px',background:'rgba(255,255,255,0.1)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:'8px',color:'#fff',fontSize:'14px',boxSizing:'border-box',resize:'none'}}/>
               </div>
-
               <div style={{marginBottom:'14px'}}>
-                <p style={{color:'#aaa',fontSize:'12px',marginBottom:'6px'}}>Announcement (popup dikhega sab users ko)</p>
+                <p style={{color:'#aaa',fontSize:'12px',marginBottom:'6px'}}>Announcement</p>
                 <textarea value={announcement} onChange={e => setAnnouncement(e.target.value)} rows={3} style={{width:'100%',padding:'10px',background:'rgba(255,255,255,0.1)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:'8px',color:'#fff',fontSize:'14px',boxSizing:'border-box',resize:'none'}}/>
               </div>
-
               <div style={{marginBottom:'14px'}}>
-                <p style={{color:'#aaa',fontSize:'12px',marginBottom:'6px'}}>XP per Level (default: 1000)</p>
+                <p style={{color:'#aaa',fontSize:'12px',marginBottom:'6px'}}>XP per Level</p>
                 <input type="number" value={xpPerLevel} onChange={e => setXpPerLevel(parseInt(e.target.value)||1000)} style={{width:'100%',padding:'10px',background:'rgba(255,255,255,0.1)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:'8px',color:'#fff',fontSize:'14px',boxSizing:'border-box'}}/>
               </div>
-
               <div style={{marginBottom:'14px'}}>
                 <p style={{color:'#aaa',fontSize:'12px',marginBottom:'6px'}}>Theme Color</p>
                 <div style={{display:'flex',gap:'10px',alignItems:'center'}}>
-                  <input type="color" value={themeColor} onChange={e => setThemeColor(e.target.value)} style={{width:'50px',height:'40px',border:'none',borderRadius:'8px',cursor:'pointer',background:'none'}}/>
+                  <input type="color" value={themeColor} onChange={e => setThemeColor(e.target.value)} style={{width:'50px',height:'40px',border:'none',borderRadius:'8px',cursor:'pointer'}}/>
                   <span style={{color:'#fff',fontSize:'14px'}}>{themeColor}</span>
                 </div>
               </div>
-
               <button onClick={saveSettings} style={{width:'100%',padding:'12px',background:'linear-gradient(90deg,#7c3aed,#4f46e5)',border:'none',borderRadius:'10px',color:'#fff',fontSize:'15px',cursor:'pointer',fontWeight:'bold'}}>
                 💾 Save Settings
               </button>
             </>
           )}
 
-          {/* USERS TAB */}
           {tab === 'users' && (
             <>
               <p style={{color:'#aaa',fontSize:'13px',marginBottom:'12px'}}>Total Users: {users.length}</p>
               <h3 style={{color:'#aaa',fontSize:'13px',marginBottom:'8px'}}>🏆 Leaderboard</h3>
-              {topUsers.map((u, i) => (
+              {topUsers.map((u,i) => (
                 <div key={u.id} style={{display:'flex',alignItems:'center',gap:'10px',background:'rgba(255,255,255,0.05)',borderRadius:'10px',padding:'12px',marginBottom:'8px'}}>
                   <span style={{color:'#a78bfa',fontWeight:'bold',width:'20px'}}>#{i+1}</span>
                   <div style={{flex:1}}>
@@ -219,7 +198,6 @@ export default function Admin({ user, setShowAdmin }) {
             </>
           )}
 
-          {/* REQUESTS TAB */}
           {tab === 'requests' && (
             <>
               <p style={{color:'#aaa',fontSize:'13px',marginBottom:'12px'}}>User Requests ({requests.length})</p>
@@ -229,10 +207,10 @@ export default function Admin({ user, setShowAdmin }) {
               {requests.map(req => (
                 <div key={req.id} style={{background:'rgba(255,255,255,0.05)',borderRadius:'10px',padding:'14px',marginBottom:'10px',border:`1px solid ${req.status==='approved'?'#059669':req.status==='rejected'?'#ff4444':'rgba(255,255,255,0.1)'}`}}>
                   <div style={{display:'flex',justifyContent:'space-between',marginBottom:'6px'}}>
-                    <span style={{color:'#fff',fontWeight:'bold',fontSize:'14px'}}>{req.type === 'habit' ? '🎯 Habit Request' : '💬 Suggestion'}</span>
-                    <span style={{color:req.status==='approved'?'#059669':req.status==='rejected'?'#ff4444':'#aaa',fontSize:'12px'}}>{req.status || 'Pending'}</span>
+                    <span style={{color:'#fff',fontWeight:'bold',fontSize:'14px'}}>{req.type==='habit'?'🎯 Habit Request':'💬 Suggestion'}</span>
+                    <span style={{color:req.status==='approved'?'#059669':req.status==='rejected'?'#ff4444':'#aaa',fontSize:'12px'}}>{req.status||'Pending'}</span>
                   </div>
-                  <p style={{color:'#ccc',fontSize:'13px',margin:'0 0 6px'}}>{req.habitName || req.message}</p>
+                  <p style={{color:'#ccc',fontSize:'13px',margin:'0 0 6px'}}>{req.habitName||req.message}</p>
                   <p style={{color:'#555',fontSize:'11px',margin:'0 0 10px'}}>User: {req.userId?.slice(0,20)}...</p>
                   {!req.status && (
                     <div style={{display:'flex',gap:'8px'}}>
@@ -245,13 +223,12 @@ export default function Admin({ user, setShowAdmin }) {
             </>
           )}
 
-          {/* ANALYTICS TAB */}
           {tab === 'analytics' && (
             <>
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginBottom:'16px'}}>
                 {[
                   {label:'Total Users',value:users.length,icon:'👥'},
-                  {label:'Total XP Earned',value:users.reduce((s,u)=>s+(u.totalXP||0),0),icon:'⚡'},
+                  {label:'Total XP',value:users.reduce((s,u)=>s+(u.totalXP||0),0),icon:'⚡'},
                   {label:'Avg Level',value:users.length>0?Math.round(users.reduce((s,u)=>s+(u.level||1),0)/users.length):0,icon:'🏆'},
                   {label:'Avg Streak',value:users.length>0?Math.round(users.reduce((s,u)=>s+(u.streak||0),0)/users.length):0,icon:'🔥'},
                 ].map((s,i) => (
@@ -262,9 +239,8 @@ export default function Admin({ user, setShowAdmin }) {
                   </div>
                 ))}
               </div>
-
               <h3 style={{color:'#aaa',fontSize:'13px',marginBottom:'8px'}}>🎯 Popular Habits</h3>
-              {sortedHabits.map(([name, count], i) => (
+              {sortedHabits.map(([name,count],i) => (
                 <div key={i} style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'8px'}}>
                   <span style={{color:'#a78bfa',width:'20px',fontSize:'13px'}}>#{i+1}</span>
                   <span style={{flex:1,color:'#fff',fontSize:'13px'}}>{name}</span>
